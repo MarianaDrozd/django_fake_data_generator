@@ -12,10 +12,4 @@ urlpatterns = [
     path('schemas/<int:pk>/edit', DataSchemaUpdateView.as_view(), name='schema_update'),
     path('schemas/<int:pk>/delete', DataSchemaDeleteView.as_view(), name='schema_delete'),
     path('schemas/<int:data_schema_id>/generate_data/', GenerateDataView.as_view(), name='generate_data'),
-
-    # path('schema/<int:pk>/generate_csv/', generate_dataset, name='generate_csv'),
-    # path('schema/<int:pk>/download_csv/', generate_csv, name='download_csv'),
-    # path('<int:schema_id>/generate-data/', generate_data_view, name='generate_data'),
-    # path('<int:schema_id>/download-data/', download_data_view, name='download_data'),
-
 ]
