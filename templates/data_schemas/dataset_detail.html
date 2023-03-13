@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% if messages %}
+                <div class="container mt-3">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="col-12 align-items-center justify-content-center">
+                <h1>{{ schema.name }}</h1>
+                <span><a href="{% url 'schema_update' schema.id %}" class="float-left mt-3 ml-5">Edit Schema</a></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <table class="table ">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Column Name</th>
+                        <th>Column Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for column in schema.schema_column.all %}
+                        <tr>
+                            <td>{{ column.order }}</td>
+                            <td>{{ column.name }}</td>
+                            <td>{{ column.data_type }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row ">
+            <div class="col-12 ">
+                <h1 class="d-inline-block">Data sets</h1>
+                <form method="post" action="{% url 'generate_data' schema.id %}" class="form-inline align-items-center justify-content-center">
+                    {% csrf_token %}
+                    <label for="num_of_records">Number of rows:</label>
+                    <input type="number" name="num_of_records" id="num_of_records" required>
+                    <button class="btn btn-primary" type="submit">Generate data</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <table class="table ">
+                    <thead>
+                    <tr>
+                        <th> #</th>
+                        <th> Created</th>
+                        <th> Status</th>
+                        <th> Info</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for dataset in schema.data_schema.all %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ dataset.created_at|date:"Y-m-d" }}</td>
+                            <td>
+                                {{ dataset.status }}
+                            </td>
+                            <td>
+                                {% if dataset.status == 'ready' %}
+                                    <div class="alert alert-success" role="alert">
+                                      Data has been downloaded.
+                                    </div>
+                                    <form id="generate-csv-form" data-dataset-id="{{ dataset.id }}">
+                                      {% csrf_token %}
+                                    </form>
+                                  {% elif dataset.status == 'processing' %}
+                                    <div class="alert alert-warning" role="alert">
+                                      Data is being generated. Please wait and refresh the page.
+                                    </div>
+                                  {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+{% endblock %}
+
+<script>
+    setTimeout(() => {
+  document.location.reload();
+}, 3000);
+
+</script>

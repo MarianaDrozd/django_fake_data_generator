@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Data Schemas</h1>
+    <a href="{% url 'new_schema' %}" class="btn btn-success" style="float: right;">New Schema</a>
+{#  <hr>#}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Modified</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for schema in object_list %}
+        <tr>
+          <td><a href="{% url 'schema_detail' schema.id %}" style="text-decoration: none">{{ schema.name }}</a> </td>
+          <td>
+          {{ schema.modified_at }}
+{#            {% if schema.status == 'processing' %}#}
+{#              <span class="badge badge-warning">Processing</span>#}
+{#            {% elif schema.status == 'ready' %}#}
+{#              <span class="badge badge-success">Ready</span>#}
+{#            {% endif %}#}
+          </td>
+            <td>
+            <a href="{% url 'schema_update' schema.id %}" style="text-decoration: none">Edit schema</a>
+{#            {% if schema.status == 'ready' %}#}
+              <a href="{% url 'schema_delete' schema.id %}" style="text-decoration: none; color: red">Delete</a>
+{#            {% endif %}#}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

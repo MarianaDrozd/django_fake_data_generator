@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="index" align="center">
+        Welcome to FakeCSV!
+        <p>This is a web application that allows you to generate fake data.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'schemas_list' %}" role="button">View Schemas</a>
+    </div>
+{% endblock %}
+</html>

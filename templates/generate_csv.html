@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{ schema.name }}</h1>
+  <form method="POST">
+    {% csrf_token %}
+    <label for="num_records">Number of records:</label>
+    <input type="number" name="num_records">
+    <button type="submit">Generate data</button>
+  </form>
+  {% if schema.status == 'processing' %}
+    <p><strong>Status:</strong> Processing...</p>
+  {% elif schema.status == 'ready' %}
+    <p><strong>Status:</strong> Ready <a href="{% url 'download_csv' schema.id %}">Download</a></p>
+  {% endif %}
+{% endblock %}
