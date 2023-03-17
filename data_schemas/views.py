@@ -1,13 +1,14 @@
 import csv
-import datetime
 
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import View, TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from faker import Faker
 
+from fake_data_generator import settings
 from .forms import DataColumnFormSet, DataSchemaForm
 from .models import DataSchema, DataColumn, Dataset
 
@@ -33,25 +34,32 @@ class DataSchemaCreateView(CreateView):
     model = DataSchema
 
     def get_context_data(self, **kwargs):
-        # we need to overwrite get_context_data
-        # to make sure that our formset is rendered
-        context = super(DataSchemaCreateView, self).get_context_data(**kwargs)
+        data = super().get_context_data(**kwargs)
         if self.request.POST:
-            context["children"] = DataColumnFormSet(self.request.POST)
+            data['formset'] = DataColumnFormSet(self.request.POST, prefix='schema_column', instance=self.object)
         else:
-            context["children"] = DataColumnFormSet()
-        return context
+            data['formset'] = DataColumnFormSet(prefix='schema_column', instance=self.object)
+        return data
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        children = context["children"]
+        formset = DataColumnFormSet(self.request.POST, instance=self.object, prefix='schema_column')
         form.instance.user = self.request.user
-        self.object = form.save()
-
-        if children.is_valid():
-            children.instance = self.object
-            children.save()
-        return super().form_valid(form)
+        if formset.is_valid():
+            self.object = form.save()
+            for inline_form in formset.forms:
+                if inline_form.has_changed():
+                    inline_obj = inline_form.save(commit=False)
+                    inline_obj.data_schema = self.object
+                    inline_obj.save()
+            for form in formset.extra_forms:  # Save dynamically added forms
+                if form.has_changed():
+                    inline_obj = form.save(commit=False)
+                    inline_obj.data_schema = self.object
+                    inline_obj.save()
+            for inline_form in formset.deleted_forms:
+                inline_form.instance.delete()  # Delete forms that were marked for deletion
+            return redirect(self.get_success_url())
+        return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     def get_success_url(self):
         return reverse("schemas_list")
@@ -70,12 +78,6 @@ class DataSchemaDetailView(LoginRequiredMixin, DetailView):
         return DataSchema.objects.filter(id=pk)
 
     def get_context_data(self, **kwargs):
-        # we need to overwrite get_context_data
-        # to make sure that our formset is rendered.
-        # the difference with CreateView is that
-        # on this view we pass instance argument
-        # to the formset because we already have
-        # the instance created
         data = super().get_context_data(**kwargs)
 
         return data
@@ -88,28 +90,35 @@ class DataSchemaUpdateView(LoginRequiredMixin, UpdateView):
     fields = ["name"]
 
     def get_context_data(self, **kwargs):
-        # we need to overwrite get_context_data
-        # to make sure that our formset is rendered.
-        # the difference with CreateView is that
-        # on this view we pass instance argument
-        # to the formset because we already have
-        # the instance created
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data["children"] = DataColumnFormSet(self.request.POST, instance=self.object)
+            data['formset'] = DataColumnFormSet(self.request.POST, prefix='schema_column', instance=self.object)
         else:
-            data["children"] = DataColumnFormSet(instance=self.object)
+            data['formset'] = DataColumnFormSet(prefix='schema_column', instance=self.object)
         return data
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        children = context["children"]
-        form.instance.modified_at = datetime.date.today()
-        self.object = form.save()
-        if children.is_valid():
-            children.instance = self.object
-            children.save()
-        return super().form_valid(form)
+        formset = DataColumnFormSet(self.request.POST, instance=self.object, prefix='schema_column')
+        form.instance.user = self.request.user
+        if formset.is_valid():
+            self.object = form.save()
+
+            for inline_form in formset.forms:
+                if inline_form.has_changed():
+                    inline_obj = inline_form.save(commit=False)
+                    inline_obj.data_schema = self.object
+                    inline_obj.save()
+            # Save dynamically added forms
+            for form in formset.extra_forms:
+                if form.has_changed():
+                    inline_obj = form.save(commit=False)
+                    inline_obj.data_schema = self.object
+                    inline_obj.save()
+            for inline_form in formset.deleted_forms:
+                inline_form.instance.delete()  # Delete forms that were marked for deletion
+            return redirect(self.get_success_url())
+
+        return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
     def get_success_url(self):
         return reverse("schemas_list")
@@ -169,7 +178,7 @@ class GenerateDataView(View):
 
         # Write the data to a CSV file
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{data_schema.name}.csv"'
+        response['Content-Disposition'] = f'attachment; filename="{settings.MEDIA_ROOT}/{data_schema.name}.csv"'
         writer = csv.writer(response)
         writer.writerow(header)
         for row in data:
@@ -180,4 +189,3 @@ class GenerateDataView(View):
         dataset.save()
 
         return response
-

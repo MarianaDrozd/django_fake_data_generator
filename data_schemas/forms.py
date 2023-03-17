@@ -8,7 +8,7 @@ class DataColumnForm(forms.ModelForm):
 
     class Meta:
         model = DataColumn
-        fields = ('name', 'data_type', 'sentences_num', 'start_num', 'end_num', 'order')
+        exclude = ('user',)
 
 
 DataColumnFormSet = inlineformset_factory(DataSchema, DataColumn, fields=(

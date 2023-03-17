@@ -37,9 +37,9 @@ class DataColumn(models.Model):
     name = models.CharField(max_length=50)
     data_type = models.CharField(max_length=50, choices=DATA_TYPE_CHOICES)
     sentences_num = models.IntegerField(default=1)
-    start_num = models.IntegerField(blank=True, null=True)
-    end_num = models.IntegerField(blank=True, null=True)
-    order = models.IntegerField()
+    start_num = models.IntegerField(blank=True, null=True, default=1)
+    end_num = models.IntegerField(blank=True, null=True, default=10)
+    order = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
