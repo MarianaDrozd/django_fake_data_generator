@@ -1,4 +1,5 @@
 import csv
+import io
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -178,11 +179,14 @@ class GenerateDataView(View):
 
         # Write the data to a CSV file
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{settings.MEDIA_ROOT}/{data_schema.name}.csv"'
-        writer = csv.writer(response)
-        writer.writerow(header)
-        for row in data:
-            writer.writerow(row)
+        filename = f"{data_schema.name}.csv"
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+
+        with io.open(f"{settings.MEDIA_URL}/{filename}", mode='w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(header)
+            for row in data:
+                writer.writerow(row)
 
         # Create a dataset object and save it to the database
         dataset.status = 'ready'
