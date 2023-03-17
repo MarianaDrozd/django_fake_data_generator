@@ -1,5 +1,6 @@
 import csv
 import io
+import os
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -182,7 +183,12 @@ class GenerateDataView(View):
         filename = f"{data_schema.name}.csv"
         response['Content-Disposition'] = f'attachment; filename={filename}'
 
-        with io.open(f"{settings.MEDIA_URL}/{filename}", mode='w', newline='') as csvfile:
+        directory = os.path.join(settings.MEDIA_URL)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        filepath = os.path.join(directory, filename)
+        with io.open(filepath, mode='w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(header)
             for row in data:
