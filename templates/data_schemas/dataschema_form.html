@@ -43,10 +43,10 @@
                 container.insertBefore(newForm, addButton)
 
                 totalForms.setAttribute('value', `${formNum + 1}`)
-                console.log('Add button clicked');
-                console.log(`Number of forms before adding new form: ${columnForm.length}`);
-                console.log(`Total forms value before adding new form: ${totalForms.value}`);
-                console.log(document.querySelector("#id_schema_column-TOTAL_FORMS").value)
+                {#console.log('Add button clicked');#}
+                {#console.log(`Number of forms before adding new form: ${columnForm.length}`);#}
+                {#console.log(`Total forms value before adding new form: ${totalForms.value}`);#}
+                {#console.log(document.querySelector("#id_schema_column-TOTAL_FORMS").value)#}
             }
         });
     </script>
