@@ -36,9 +36,9 @@ class DataColumn(models.Model):
     data_schema = models.ForeignKey(DataSchema, on_delete=models.CASCADE, related_name='schema_column')
     name = models.CharField(max_length=50)
     data_type = models.CharField(max_length=50, choices=DATA_TYPE_CHOICES)
-    sentences_num = models.IntegerField(default=1)
-    start_num = models.IntegerField(blank=True, null=True, default=1)
-    end_num = models.IntegerField(blank=True, null=True, default=10)
+    sentences_num = models.PositiveIntegerField(default=1)
+    start_num = models.PositiveIntegerField(blank=True, null=True, default=1)
+    end_num = models.PositiveIntegerField(blank=True, null=True, default=10)
     order = models.IntegerField(default=1)
 
     def __str__(self):
@@ -56,7 +56,7 @@ class Dataset(models.Model):
 
     schema = models.ForeignKey(DataSchema, on_delete=models.CASCADE, related_name="data_schema")
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='processing')
-    num_of_records = models.IntegerField(default=1)
+    num_of_records = models.PositiveIntegerField(default=1)
     created_at = models.DateField(auto_now_add=True, null=True)
     modified_at = models.DateField(auto_now=True, null=True)
 
