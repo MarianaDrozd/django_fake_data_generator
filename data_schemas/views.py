@@ -179,9 +179,7 @@ class GenerateDataView(View):
             data.append(row)
 
         # Write the data to a CSV file
-        response = HttpResponse(content_type='text/csv')
         filename = f"{data_schema.name}_{num_of_records}.csv"
-        # response['Content-Disposition'] = f'attachment; filename={filename}'
 
         directory = os.path.join(settings.MEDIA_ROOT)
         if not os.path.exists(directory):

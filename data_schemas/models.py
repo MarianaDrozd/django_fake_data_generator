@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from fake_data_generator.settings import MEDIA_ROOT
+
 DATA_TYPE_CHOICES = [
         ('full_name', 'Full name'),
         ('job', 'Job'),
@@ -57,7 +59,7 @@ class Dataset(models.Model):
     schema = models.ForeignKey(DataSchema, on_delete=models.CASCADE, related_name="data_schema")
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='processing')
     num_of_records = models.PositiveIntegerField(default=1)
-    csv_file = models.FilePathField(null=True, blank=True)
+    csv_file = models.FilePathField(path=MEDIA_ROOT, null=True, blank=True)
     created_at = models.DateField(auto_now_add=True, null=True)
     modified_at = models.DateField(auto_now=True, null=True)
 
