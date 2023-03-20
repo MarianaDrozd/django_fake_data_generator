@@ -57,6 +57,7 @@ class Dataset(models.Model):
     schema = models.ForeignKey(DataSchema, on_delete=models.CASCADE, related_name="data_schema")
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='processing')
     num_of_records = models.PositiveIntegerField(default=1)
+    csv_file = models.FilePathField(null=True, blank=True)
     created_at = models.DateField(auto_now_add=True, null=True)
     modified_at = models.DateField(auto_now=True, null=True)
 

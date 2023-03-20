@@ -2,7 +2,7 @@ import csv
 import io
 import os
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import redirect
 from django.views.generic import View, TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse
@@ -180,10 +180,10 @@ class GenerateDataView(View):
 
         # Write the data to a CSV file
         response = HttpResponse(content_type='text/csv')
-        filename = f"{data_schema.name}.csv"
-        response['Content-Disposition'] = f'attachment; filename={filename}'
+        filename = f"{data_schema.name}_{num_of_records}.csv"
+        # response['Content-Disposition'] = f'attachment; filename={filename}'
 
-        directory = os.path.join(settings.MEDIA_URL)
+        directory = os.path.join(settings.MEDIA_ROOT)
         if not os.path.exists(directory):
             os.makedirs(directory)
 
@@ -195,7 +195,22 @@ class GenerateDataView(View):
                 writer.writerow(row)
 
         # Create a dataset object and save it to the database
+        dataset.csv_file = filepath
         dataset.status = 'ready'
         dataset.save()
 
-        return response
+        return redirect('schema_detail', data_schema_id)
+
+
+class DownloadDataView(View):
+    def get(self, request, data_schema_id):
+        data = Dataset.objects.get(pk=data_schema_id)
+        filepath = data.csv_file
+
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                response = HttpResponse(f, content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename="{data.modified_at}.csv"'
+                return response
+        else:
+            raise Http404("File not found")
