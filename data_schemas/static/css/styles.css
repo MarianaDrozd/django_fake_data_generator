@@ -29,16 +29,10 @@ h2.navbar {
   background-color: cornsilk;
 }
 
-/*.justify-content {*/
-/*  color: #9942ed;*/
-/*}*/
 
 a, h1, th, td, button {
   font-family: "Sofia", sans-serif;
 }
-/*.div-login {*/
-/*  margin-left: 500px;*/
-/*}*/
 
 input[type=number] {
   width: 70px;
