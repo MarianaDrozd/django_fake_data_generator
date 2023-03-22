@@ -14,4 +14,3 @@ urlpatterns = [
     path('schemas/<int:data_schema_id>/generate_data/', GenerateDataView.as_view(), name='generate_data'),
     path('schemas/<int:data_schema_id>/download', DownloadDataView.as_view(), name='download_csv'),
 ]
-
