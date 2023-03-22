@@ -41,9 +41,13 @@ a, h1, th, td, button {
 /*}*/
 
 input[type=number] {
-  width: 150px;
+  width: 70px;
 }
 
+.add-column-button {
+  display: block;
+  width: 200px;
+}
 .index {
   color: black;
   font-family: "Sofia", sans-serif;

@@ -18,7 +18,8 @@
                 {{ forms.as_table }}
             </div>
         {% endfor %}
-        <button id="add-form" type="button" class="btn btn-primary">Add column</button>
+
+        <a id="add-form" type="button" class="btn btn-primary add-column-button">Add column</a>
     </form>
 
     <script>
@@ -40,6 +41,7 @@
 
                 formNum++
                 newForm.innerHTML = newForm.innerHTML.replace(formRegex, `schema_column-${formNum}-`)
+                container.insertBefore(document.createElement("br"), addButton);
                 container.insertBefore(newForm, addButton)
 
                 totalForms.setAttribute('value', `${formNum + 1}`)
