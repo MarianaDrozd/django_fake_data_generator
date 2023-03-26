@@ -55,7 +55,7 @@ class DataSchemaFormsetMixin:
         return reverse("schemas_list")
 
 
-class DataSchemaCreateView(DataSchemaFormsetMixin, CreateView):
+class DataSchemaCreateView(LoginRequiredMixin, DataSchemaFormsetMixin, CreateView):
     """A CreateView for DataSchema model with inline formset usage for DataColumns. """
     form_class = DataSchemaForm
 
