@@ -5,6 +5,7 @@ Visit here to try online: http://appelsinka.pythonanywhere.com
 
 To try this app locally, please follow these steps:
 - clone this repo;
+- rename '.env.example' file to '.env' and change variables values according to your data;
 - create and activate your local environment;
 - run `cd fake_data_generator/`;
 - run `pip install -r requirements.txt` to install all requirements;
