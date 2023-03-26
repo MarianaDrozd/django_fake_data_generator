@@ -15,36 +15,24 @@ from .forms import DataColumnFormSet, DataSchemaForm
 from .models import DataSchema, DataColumn, Dataset
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
-    """A view for the homepage."""
-    template_name = 'index.html'
+class DataSchemaFormsetMixin:
+    """A mixin class that adds support for inline formsets to DataSchema views."""
 
-
-class DataSchemaListView(LoginRequiredMixin, ListView):
-    """A ListView for DataSchema model"""
-    model = DataSchema
-    context_object_name = 'schemas'
-    template_name = 'data_schemas/list.html'
-
-    def get_queryset(self):
-        return DataSchema.objects.filter(user=self.request.user)
-
-
-class DataSchemaCreateView(CreateView):
-    """A CreateView for DataSchema model with inline formset usage for DataColumns. """
     form_class = DataSchemaForm
     model = DataSchema
+    formset_class = DataColumnFormSet
+    prefix = 'schema_column'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data['formset'] = DataColumnFormSet(self.request.POST, prefix='schema_column', instance=self.object)
+            data['formset'] = self.formset_class(self.request.POST, prefix=self.prefix, instance=self.object)
         else:
-            data['formset'] = DataColumnFormSet(prefix='schema_column', instance=self.object)
+            data['formset'] = self.formset_class(prefix=self.prefix, instance=self.object)
         return data
 
     def form_valid(self, form):
-        formset = DataColumnFormSet(self.request.POST, instance=self.object, prefix='schema_column')
+        formset = self.formset_class(self.request.POST, instance=self.object, prefix=self.prefix)
         form.instance.user = self.request.user
         if formset.is_valid():
             self.object = form.save()
@@ -67,6 +55,26 @@ class DataSchemaCreateView(CreateView):
         return reverse("schemas_list")
 
 
+class DataSchemaCreateView(DataSchemaFormsetMixin, CreateView):
+    """A CreateView for DataSchema model with inline formset usage for DataColumns. """
+    form_class = DataSchemaForm
+
+
+class HomeView(LoginRequiredMixin, TemplateView):
+    """A view for the homepage."""
+    template_name = 'index.html'
+
+
+class DataSchemaListView(LoginRequiredMixin, ListView):
+    """A ListView for DataSchema model"""
+    model = DataSchema
+    context_object_name = 'schemas'
+    template_name = 'data_schemas/list.html'
+
+    def get_queryset(self):
+        return DataSchema.objects.filter(user=self.request.user)
+
+
 class DataSchemaDetailView(LoginRequiredMixin, DetailView):
     """A DetailView for DataSchema model."""
 
@@ -85,45 +93,10 @@ class DataSchemaDetailView(LoginRequiredMixin, DetailView):
         return data
 
 
-class DataSchemaUpdateView(LoginRequiredMixin, UpdateView):
+class DataSchemaUpdateView(LoginRequiredMixin, DataSchemaFormsetMixin, UpdateView):
     """An UpdateView for DataSchema model"""
 
-    model = DataSchema
-    fields = ["name"]
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['formset'] = DataColumnFormSet(self.request.POST, prefix='schema_column', instance=self.object)
-        else:
-            data['formset'] = DataColumnFormSet(prefix='schema_column', instance=self.object)
-        return data
-
-    def form_valid(self, form):
-        formset = DataColumnFormSet(self.request.POST, instance=self.object, prefix='schema_column')
-        form.instance.user = self.request.user
-        if formset.is_valid():
-            self.object = form.save()
-
-            for inline_form in formset.forms:
-                if inline_form.has_changed():
-                    inline_obj = inline_form.save(commit=False)
-                    inline_obj.data_schema = self.object
-                    inline_obj.save()
-            # Save dynamically added forms
-            for form in formset.extra_forms:
-                if form.has_changed():
-                    inline_obj = form.save(commit=False)
-                    inline_obj.data_schema = self.object
-                    inline_obj.save()
-            for inline_form in formset.deleted_forms:
-                inline_form.instance.delete()  # Delete forms that were marked for deletion
-            return redirect(self.get_success_url())
-
-        return self.render_to_response(self.get_context_data(form=form, formset=formset))
-
-    def get_success_url(self):
-        return reverse("schemas_list")
+    form_class = DataSchemaForm
 
 
 class DataSchemaDeleteView(LoginRequiredMixin, DeleteView):
